@@ -2,6 +2,8 @@
 
 ## Building
 ```bash
+$ mkdir lib
+$ cp <LIBRAYLIB.A-PATH> ./lib/
 $ make
 $ ./fabrik
 ```
