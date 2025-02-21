@@ -115,9 +115,10 @@ typedef struct c_Arena c_Arena;
 			(da).count = 0;\
 			(da).items = C_MALLOC(sizeof(elm) * (da).capacity);\
 		}\
-		if ((da).count + 1 > (da).capacity) {\
+		if ((da).count >= (da).capacity) {\
 			(da).capacity *= 2;\
-			c_ASSERT(C_REALLOC((da).items, (da).capacity * sizeof(*(da).items)) != NULL, "TODO: Log error instead of asserting");\
+                        (da).items = C_REALLOC((da).items, (da).capacity * sizeof(elm));\
+			c_ASSERT((da).items != NULL, "TODO: Log error instead of asserting");\
 		}\
 		(da).items[(da).count++] = elm;\
 	} while (0)
