@@ -13,7 +13,7 @@ static const char *title = "Fabrik";
 static bool DEBUG_DRAW = false;
 
 #define JOINT_RADIUS 8.f
-#define JOINT_INITIAL_LEN (height * 0.25f)
+#define JOINT_INITIAL_LEN 100.f
 #define JOINT_COLOR  WHITE
 #define LIMB_COLOR   WHITE
 
@@ -39,12 +39,14 @@ typedef struct {
   Joints joints;
   Vector2 target;
   Vector2 root;
+  float speed;
 } Limb;
 
-Limb make_limb(float rx, float ry, size_t joints_count) {
+Limb make_limb(float rx, float ry, size_t joints_count, float speed) {
   Limb res = {0};
   res.root.x = rx;
   res.root.y = ry;
+  res.speed = speed;
 
   float ls = JOINT_INITIAL_LEN;
   int sum = 0;
@@ -52,7 +54,7 @@ Limb make_limb(float rx, float ry, size_t joints_count) {
     Joint j = make_joint(width * 0.5f, height - sum, ls);
     da_append(res.joints, j);
     sum += ls;
-    ls *= 0.8f;
+    ls *= 0.9f;
   }
 
   res.target = res.joints.items[res.joints.count-1].pos;
@@ -61,9 +63,10 @@ Limb make_limb(float rx, float ry, size_t joints_count) {
 }
 
 void fabrik_forward(Limb* l, float delta) {
-  (void)delta;
   Joint *next = &(l->joints.items[l->joints.count-1]);
-  next->pos = l->target;
+
+  next->pos = Vector2MoveTowards(next->pos, l->target, delta*l->speed);
+  /*next->pos = l->target;*/
 
   for (int i = (int)(l->joints.count-2); i >= 0; --i) {
     Joint *current = &(l->joints.items[i]);
@@ -101,13 +104,13 @@ void draw_limb(Limb *l, bool debug) {
   Vector2 c, n;
 
   c = l->joints.items[0].pos;
-  DrawCircleV(c, JOINT_RADIUS, JOINT_COLOR);
+  /*DrawCircleV(c, JOINT_RADIUS, JOINT_COLOR);*/
   for (size_t i = 0; i < l->joints.count-1; ++i) {
     c = l->joints.items[i].pos;
     n = l->joints.items[i+1].pos;
 
     DrawLineV(c, n, LIMB_COLOR);
-    DrawCircleV(n, JOINT_RADIUS, JOINT_COLOR);
+    /*DrawCircleV(n, JOINT_RADIUS, JOINT_COLOR);*/
   }
 }
 
@@ -115,16 +118,16 @@ int main(void) {
   InitWindow(width, height, title);
 
   // TODO: Free the joints of the limb
-  Limb l = make_limb(width*0.5f, height, 8);
+  Limb l = make_limb(width*0.5f, height, 250, 500.f);
 
   while (!WindowShouldClose()) {
     BeginDrawing();
 
     ClearBackground(BLACK);
 
-    if (IsKeyDown(KEY_SPACE)) {
-      l.target = GetMousePosition();
-    }
+    /*if (IsKeyDown(KEY_SPACE)) {*/
+    l.target = GetMousePosition();
+    /*}*/
 
     DrawFPS(0, 0);
     update_limb(&l, GetFrameTime());
